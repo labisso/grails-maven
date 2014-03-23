@@ -323,21 +323,24 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             final String targetDir = this.project.getBuild().getDirectory();
             ForkedGrailsRuntime.ExecutionContext ec = new ForkedGrailsRuntime.ExecutionContext();
             ec.setBuildDependencies(resolveGrailsExecutionPathJars(true));
-            List<File> providedDependencies = resolveArtifacts(getProvidedArtifacts(project));
-            List<File> compileDependencies = getCompileFiles();
-            Set<File> testDependencies = new HashSet<File>();
-            Set<File> runtimeDependencies = new HashSet<File>( getRuntimeFiles() );
-            runtimeDependencies.addAll(compileDependencies);
+            List<File> providedDependencies = resolveArtifacts(getProvidedArtifacts(project));            
+            List<File> compileDependencies = resolveArtifacts(getCompileArtifacts(project));
+
+            Set<File> runtimeDependencies = new HashSet<File>( resolveArtifacts(getRuntimeArtifacts(project)) );
+            runtimeDependencies.addAll( compileDependencies );
+
+            Set<File> testDependencies = new HashSet<File>( resolveArtifacts(getTestArtifacts(project)) );
+
 
             testDependencies.addAll( providedDependencies );
             testDependencies.addAll( compileDependencies );
             testDependencies.addAll( runtimeDependencies );
-            testDependencies.addAll( getTestFiles() );
+            testDependencies.addAll( testDependencies );
 
             ec.setProvidedDependencies(providedDependencies);
-            ec.setRuntimeDependencies(new ArrayList<File>(runtimeDependencies));
             ec.setCompileDependencies(compileDependencies);
-            ec.setTestDependencies(new ArrayList<File>(testDependencies));
+            ec.setTestDependencies( new ArrayList<File>(testDependencies) );
+            ec.setRuntimeDependencies( new ArrayList<File>(runtimeDependencies) );
 
             ec.setGrailsWorkDir(new File(grailsWorkDir));
             ec.setProjectWorkDir(new File(targetDir));
